@@ -2,7 +2,6 @@ import { parseIcsCalendar } from "@ts-ics/schema-zod";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import { cacheLife } from "next/cache";
 import { IcsEvent, type IcsCalendar } from "ts-ics";
 import {
   calendarID,
@@ -17,13 +16,17 @@ dayjs.tz.setDefault("America/Vancouver");
 
 type EventWithEndDate = Extract<IcsEvent, { end: { date: Date } }>;
 export async function IsLoungeBooked() {
-  "use cache";
-  cacheLife("hours");
+  // "use cache";
+  // cacheLife("hours");
   const response = await fetch(calendarURL);
   const data = await response.text();
   const { events }: IcsCalendar = parseIcsCalendar(data);
-  if (!events) return null;
+  if (!events) return <p className="text-xl text-red-500">чето не так</p>;
   const now = dayjs();
+  console.log(events);
+  console.log(
+    events.filter((event) => dayjs(event.start.date).isSame(now, "day")),
+  );
   const upcomingEvents = events.filter((event): event is EventWithEndDate => {
     const eventDate = dayjs(event.start.date);
     return (
@@ -33,6 +36,7 @@ export async function IsLoungeBooked() {
       !!event.end
     );
   });
+  console.log(upcomingEvents);
   if (upcomingEvents.length === 0) {
     return (
       <p className="text-4xl font-bold text-green-500 animate-bounce [animation-duration:.4s]">
