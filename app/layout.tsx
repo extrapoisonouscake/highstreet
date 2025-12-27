@@ -9,6 +9,10 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: "проверялка лаунджа🪩",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({

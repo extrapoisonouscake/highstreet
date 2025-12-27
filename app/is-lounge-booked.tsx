@@ -12,8 +12,11 @@ import {
 const calendarURL = `https://outlook.office365.com/owa/published/${calendarScopeID}/${calendarID}/calendar.ics`;
 dayjs.extend(timezone);
 dayjs.extend(utc);
-dayjs.tz.setDefault("America/Vancouver");
-
+const INSTANTIATED_TIMEZONE = "America/Vancouver";
+dayjs.tz.setDefault(INSTANTIATED_TIMEZONE);
+const timezonedDayJS = (...args: Parameters<typeof dayjs>) => {
+  return dayjs(...args).tz(INSTANTIATED_TIMEZONE);
+};
 type EventWithEndDate = Extract<IcsEvent, { end: { date: Date } }>;
 export async function IsLoungeBooked() {
   // "use cache";
@@ -22,13 +25,15 @@ export async function IsLoungeBooked() {
   const data = await response.text();
   const { events }: IcsCalendar = parseIcsCalendar(data);
   if (!events) return <p className="text-xl text-red-500">чето не так</p>;
-  const now = dayjs();
+  const now = timezonedDayJS();
   console.log(events);
   console.log(
-    events.filter((event) => dayjs(event.start.date).isSame(now, "day")),
+    events.filter((event) =>
+      timezonedDayJS(event.start.date).isSame(now, "day"),
+    ),
   );
   const upcomingEvents = events.filter((event): event is EventWithEndDate => {
-    const eventDate = dayjs(event.start.date);
+    const eventDate = timezonedDayJS(event.start.date);
     return (
       event.summary.startsWith(LOUNGE_BOOKING_EVENT_PREFIX) &&
       eventDate.isSame(now, "day") &&
@@ -57,7 +62,7 @@ function formatEventsSummary(events: EventWithEndDate[]) {
   let str = "";
   for (let i = 0; i < events.length; i++) {
     const event = events[i];
-    str += `с ${dayjs(event.start.date).format(timeFormat)} до ${dayjs(
+    str += `с ${timezonedDayJS(event.start.date).format(timeFormat)} до ${timezonedDayJS(
       event.end.date,
     ).format(timeFormat)}`;
     if (i < events.length - 2) {
