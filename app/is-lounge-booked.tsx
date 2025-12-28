@@ -29,12 +29,12 @@ export async function IsLoungeBooked() {
   const now = timezonedDayJS();
 
   const upcomingEvents = events.filter((event): event is EventWithEndDate => {
-    const eventDate = timezonedDayJS(event.start.date);
+    if(!event.end) return false
+    const endDate = timezonedDayJS(event.end.date);
     return (
       event.summary.startsWith(LOUNGE_BOOKING_EVENT_PREFIX) &&
-      eventDate.isSame(now, "day") &&
-      eventDate.isAfter(now) &&
-      !!event.end
+      endDate.isSame(now, 'day') &&
+      endDate.isAfter(now)
     );
   });
   if (upcomingEvents.length === 0) {
