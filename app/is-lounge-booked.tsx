@@ -5,9 +5,9 @@ import utc from "dayjs/plugin/utc";
 import { cacheLife } from "next/cache";
 import { IcsEvent, type IcsCalendar } from "ts-ics";
 import {
+  LOUNGE_BOOKING_EVENT_PREFIX,
   calendarID,
   calendarScopeID,
-  LOUNGE_BOOKING_EVENT_PREFIX,
 } from "./constants";
 
 const calendarURL = `https://outlook.office365.com/owa/published/${calendarScopeID}/${calendarID}/calendar.ics`;
@@ -21,7 +21,7 @@ const timezonedDayJS = (...args: Parameters<typeof dayjs>) => {
 type EventWithEndDate = Extract<IcsEvent, { end: { date: Date } }>;
 export async function IsLoungeBooked() {
   "use cache";
-  cacheLife("hours");
+  cacheLife("minutes");
   const response = await fetch(calendarURL);
   const data = await response.text();
   const { events }: IcsCalendar = parseIcsCalendar(data);
@@ -29,11 +29,11 @@ export async function IsLoungeBooked() {
   const now = timezonedDayJS();
 
   const upcomingEvents = events.filter((event): event is EventWithEndDate => {
-    if(!event.end) return false
+    if (!event.end) return false;
     const endDate = timezonedDayJS(event.end.date);
     return (
       event.summary.startsWith(LOUNGE_BOOKING_EVENT_PREFIX) &&
-      endDate.isSame(now, 'day') &&
+      endDate.isSame(now, "day") &&
       endDate.isAfter(now)
     );
   });
