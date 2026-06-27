@@ -10,7 +10,7 @@ import {
   calendarScopeID,
 } from "./constants";
 
-const calendarURL = `https://outlook.office365.com/owa/published/${calendarScopeID}/${calendarID}/calendar.ics`;
+const calendarURL = `https://outlook.office365.com/owa/calendar/${calendarScopeID}/${calendarID}/calendar.ics`;
 dayjs.extend(timezone);
 dayjs.extend(utc);
 const INSTANTIATED_TIMEZONE = "America/Vancouver";
